@@ -23,7 +23,7 @@ n_epochs = 100;
 lambda = 0;
 
 
-GradientDescent_params = [n_batch' eta' n_epochs];
+GradientDescent_params = [n_batch eta n_epochs];
 %Init Matrix and bias
 [W, b] = Init(stdInit, meanInit, Xtrain, Ytrain);
 
@@ -66,5 +66,5 @@ startTrainAccuracy = ComputeAccuracy(Xtrain, ytrain, W, b)
 finalTrainAccuracy = ComputeAccuracy(Xtrain, ytrain, Wstar, bstar)
 finalTestAccuracy = ComputeAccuracy(Xtest, ytest, Wstar, bstar)
 
-%plotCostFunctions(J_costTrain_vector, J_costValidation_vector, n_epochs);
+plotCostFunctions(J_costTrain_vector, J_costValidation_vector, n_epochs);
 
