@@ -1,6 +1,6 @@
-%calc the classifiers accuracy
+%calculate the accuracy
 function acc = ComputeAccuracy(X, y, W, b)
-    %init
+
     acc = 0;
     P = EvaluateClassifier(X, W, b);
     %Get indexes for maximum prob which class for a certain image

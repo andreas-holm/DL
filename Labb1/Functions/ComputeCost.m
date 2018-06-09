@@ -9,7 +9,7 @@ function [J] = ComputeCost(X, Y, W, b, lambda)
     crossEntropy = sum(sum(-log(P(logical(Y)))));
     
     %calc regularization
-    reg = lambda * sum(sum(W.^2));
+    reg = lambda*sum(sum(W.^2));
     
     %calc cost-function
     J = (1/sampleSize)*crossEntropy + reg;

@@ -6,19 +6,16 @@ function [grad_b, grad_W] = ComputeGradsAnalytical(X, Y, W, b, lambda)
     
     grad_b = zeros(length(Y(:,1)),1);
     grad_W = zeros(length(Y(:,1)), imageDimensions);
-    size(grad_W)
+    
     imageSize = length(X(1,:));
     for i = 1:imageSize
         probVec = P(:,i);
         yVec = Y(:,i);
-        yVecT = yVec';
         xVec= X(:,i);
         
-        grad = - (yVec/(yVecT*probVec))*(diag(probVec) - probVec*probVec');
-        gradT = grad';
-        size(grad)
-        grad_b = grad_b + gradT;
-        grad_W = grad_W + gradT*xVec';
+        grad = - (yVec./(yVec'.*probVec))*(diag(probVec) - probVec.*probVec');
+        grad_b = grad_b + grad';
+        grad_W = grad_W + (grad')*xVec';
     end
     
     grad_W_norm = grad_W/imageSize;
