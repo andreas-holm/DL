@@ -2,69 +2,78 @@ format long
 
 %init model 
 
-[Xtrain, Ytrain, ytrain] = LoadBatch('data_batch_1.mat');
+% Data -----------------------------------------
 
-[Xtest, Ytest, ytest] = LoadBatch('test_batch.mat');
+[XtrainSet, YtrainSet, ytrainSet] = LoadBatch('data_batch_1.mat');
 
-%Size(b) = #Labels * 1
-%Size(W) = #Labels * dim of each image
+[XtestSet, YtestSet, ytestSet] = LoadBatch('test_batch.mat');
+[XvalSet, YtestSet, ytestSet] = LoadBatch('test_batch.mat');
 
+%Parameters-------------------------------------
 %Init each entry to have Gaussian dist random values
 meanInit = 0;
 stdInit = 0.1;
 
 %number of mini-batches to divide the whole dataset into
 n_batch = 100;
-%the learning rate
-eta = 0.05;
+%Learning rate
+eta = 0.1;
 %number of epochs to train for
-n_epochs = 100;
+n_epochs = 40;
 %regularization penalization term lambda
 lambda = 0;
 
-
+%-----------------------------------------------
 GradientDescent_params = [n_batch eta n_epochs];
 %Init Matrix and bias
 [W, b] = Init(stdInit, meanInit, Xtrain, Ytrain);
 
-%generate training, validation and test sets
-partTraining = 0.9;
-%partValidation = 1 - partTraining;
-[Xtrain, Ytrain, ytrain, Xvalid, Yvalid] = generateTestAndTraining(Xtrain, Ytrain, ytrain, partTraining);
+
+sampleSize = length(Xtrain(1,:));
+%ending = int64(part*sampleSize);
+ %XtrainSet = Xtrain(:, 1:ending);
+ %YtrainSet = Ytrain(:, 1:ending);
+ %ytrainSet = ytrain(1:ending);
+ 
+%Genereate our validation set
+ %XvalSet = Xtrain(:, (ending + 1):end);
+ %YvalSet = Ytrain(:, (ending + 1):end);
 
 
-J_cost_init = ComputeCost(Xtrain, Ytrain, W, b, lambda)
-J_costValidBest = ComputeCost(Xvalid, Yvalid, W, b, lambda);
-J_costTrain_vector = [];
-J_costValidation_vector = [];
+J_InitCost = ComputeCost(XtrainSet, YtrainSet, W, b, lambda)
+J_BestValCost = ComputeCost(XvalSet, YvalSet, W, b, lambda);
+J_TrainingCostVector = [];
+J_valCostVector = [];
 
 Wstar = W;
 bstar = b;
-%learn Wstar and bstar matrices
+%Training Wstar and bstar
 for i = 1:n_epochs
     
-    [WstarIter, bstarIter] = MiniBatchGD(Xtrain, Ytrain, GradientDescent_params, Wstar, bstar, lambda);
+    [WstarTemp, bstarTemp] = MiniBatchGD(XtrainSet, YtrainSet, GradientDescent_params, Wstar, bstar, lambda);
     i
-    J_costTrain = ComputeCost(Xtrain, Ytrain, WstarIter, bstarIter, lambda);
-    J_costValid = ComputeCost(Xvalid, Yvalid, WstarIter, bstarIter, lambda);
-    J_costTrain_vector = [J_costTrain_vector J_costTrain];
+    J_TrainingCost = ComputeCost(XtrainSet, YtrainSet, WstarTemp, bstarTemp, lambda)
+    J_validCost = ComputeCost(XvalSet, YvalSet, WstarTemp, bstarTemp, lambda);
+    J_TrainingCostVector = [J_TrainingCostVector J_TrainingCost];
     
-    if(J_costValid < J_costValidBest)
-        Wstar = WstarIter;
-        bstar = bstarIter;
-        J_costValidBest = J_costValid
+    if(J_validCost < J_BestValCost)
+        Wstar = WstarTemp;
+        bstar = bstarTemp;
+        J_BestValCost = J_validCost;
     end
     
-    %set a decay rate 
     GradientDescent_params(2) = 0.9*GradientDescent_params(2);
     
-    %J_costValidation = ComputeCost(Xvalid, Yvalid, Wstar, bstar, lambda)
-    %J_costValidation_vector = [J_costValidation_vector J_costValidation];
-    
+    J_valCost = ComputeCost(XvalSet, YvalSet, Wstar, bstar, lambda)
+    J_valCostVector = [J_valCostVector J_valCost];
 end 
-startTrainAccuracy = ComputeAccuracy(Xtrain, ytrain, W, b)
-finalTrainAccuracy = ComputeAccuracy(Xtrain, ytrain, Wstar, bstar)
-finalTestAccuracy = ComputeAccuracy(Xtest, ytest, Wstar, bstar)
+trainingCostInit  = ComputeCost(Xtrain, Ytrain, W, b, lambda)
+finalTrainCost = ComputeCost(Xtrain, Ytrain, Wstar, bstar, lambda)
+trainingAccInit = ComputeAccuracy(XtrainSet, ytrainSet, W, b)
+trainingAcc = ComputeAccuracy(XtrainSet, ytrainSet, Wstar, bstar)
+testAcc = ComputeAccuracy(Xtest, ytest, Wstar, bstar)
 
-plotCostFunctions(J_costTrain_vector, J_costValidation_vector, n_epochs);
+plotCostFunctions(J_TrainingCostVector, J_valCostVector, n_epochs);
+hold on
+%DisplayWMatrix(Wstar);
 
